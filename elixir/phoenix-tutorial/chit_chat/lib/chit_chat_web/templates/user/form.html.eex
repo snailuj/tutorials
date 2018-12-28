@@ -1,0 +1,40 @@
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <%= label f, :name %>
+  <%= text_input f, :name %>
+  <%= error_tag f, :name %>
+
+  <!-- f is the form it attaches to -->
+  <%= label f, :username %>
+  <%= text_input f, :username %>
+  <%= error_tag f, :username %>
+
+  <!-- need to add the inputs for credentials because gen had no idea we would link them together in this way -->
+  <div class="form-group">
+    
+    <!-- declares that we want inputs for the :credentials struct embedded in the User (how we set it up) -->
+    <%= inputs_for f, :credential, fn credential_form -> %>
+      <!-- attach these to the credential_form, not f! -->
+      <%= label credential_form, :email %>
+      <%= text_input credential_form, :email %>
+      <%= error_tag credential_form, :email %>
+
+      <%= label credential_form, :password %>
+      <%= password_input credential_form, :password %>
+      <%= error_tag credential_form, :password %>
+
+      <%= label credential_form, :password_confirmation %>
+      <%= password_input credential_form, :password_confirmation %>
+      <%= error_tag credential_form, :password_confirmation %>
+    <% end %>
+  </div>
+
+  <div>
+    <%= submit "Save" %>
+  </div>
+<% end %>
