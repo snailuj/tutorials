@@ -16,14 +16,15 @@ defmodule KVRegistryTest do
   becomes a problem, we can start a supervisor per test and pass it as an argument
   to the registry start_link function.
   """
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
-  setup do
+  setup context do
     # calling start_supervised instead of calling KV.Registry.start_link/1
     # directly means that ExUnit can guarantee that the registry process is
     # shut down before the next test starts
-    registry = start_supervised!(KV.Registry)
-    %{registry: registry}
+    # each test has it's own unique name, so we use it to name the registry
+    _ = start_supervised!({KV.Registry, name: context.test})
+    %{registry: context.test}
   end
 
   test "spawns buckets", %{registry: registry} do
@@ -40,17 +41,41 @@ defmodule KVRegistryTest do
     KV.Registry.create(registry, "shopping")
     {:ok, bucket} = KV.Registry.lookup(registry, "shopping")
     Agent.stop(bucket)
-    # should error because removed
+    # should error because removed -- but first do a synchronous call
+    # to ensure the registry processed the DOWN message from Agent.stop
+    # (inbox messages are processed in the order received so we're guaranteed
+    # that once `KV.Registry.create/2` finishes, the DOWN message will be
+    # processed too)
+    _ = KV.Registry.create(registry, "bogus")
     assert KV.Registry.lookup(registry, "shopping") == :error
   end
 
   test "removes buckets on crash", %{registry: registry} do
+    # :dbg.tracer
+    # :dbg.p self()
+    # :dbg.p :new
     KV.Registry.create(registry, "shopping")
     {:ok, bucket} = KV.Registry.lookup(registry, "shopping")
 
     # stop the bucket with non-normal reason
     Agent.stop(bucket, :shutdown)
-    # should error because removed
+    # should error because removed -- but first do a synchronous call
+    # to ensure the KV.Registry processed the DOWN message from Agent.stop
+    # (inbox messages are processed in the order received so we're guaranteed
+    # that once `KV.Registry.create/2` finishes, the DOWN message will be
+    # processed too)
+    _ = KV.Registry.create(registry, "bogus")
     assert KV.Registry.lookup(registry, "shopping") == :error
+  end
+
+  test "bucket can crash at any time", %{registry: registry} do
+    KV.Registry.create(registry, "shopping")
+    {:ok, bucket} = KV.Registry.lookup(registry, "shopping")
+
+    # Simulate a bucket crash by explicitly and synchronously shutting it down.
+    Agent.stop(bucket, :shutdown)
+
+    # Now trying to call the dead process causes a :noproc exit
+    catch_exit KV.Bucket.put(bucket, "milk", 3)
   end
 end
