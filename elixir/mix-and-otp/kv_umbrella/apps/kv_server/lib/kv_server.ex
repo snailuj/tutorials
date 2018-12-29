@@ -44,22 +44,62 @@ defmodule KVServer do
     loop_acceptor(socket)
   end
 
+  ## Task entry function, spawned for each `:gen_tcp.accept/1`
   defp serve(client) do
-    client
-    |> read_line
-    |> write_line(client)
+    # msg =
+    #   case read_line(client) do
+    #     {:ok, data} ->
+    #       case KVServer.Command.parse(data) do
+    #         {:ok, command} ->
+    #           KVServer.Command.run(command)
+    #         # parse error, found via destructuring but return the whole tuple by assigning to `err`
+    #         {:error, _} = err -> err
+    #       end
+    #     # error in `read_line/1`
+    #     {:error, _} = err -> err
+    #   end
+    # Can replace the nested `case` statements above with a `with` statement:
+    # retrieves the value returned by the right-side of <- and matches it against
+    # the pattern on the left side. If the value matches the pattern, `with` moves on to the
+    # next expression. In case there is no match, the non-matching value is assigned to `msg`
 
+    msg =
+      with {:ok, data} <- read_line(client),
+           {:ok, command} <- KVServer.Command.parse(data),
+           do: KVServer.Command.run(command)
+
+    write_line(client, msg)
     # recursively read from client
     serve(client)
   end
 
   defp read_line(client) do
     # will block until data is received because active: false was specified in `KVServer.accept/1`
-    {:ok, data} = :gen_tcp.recv(client, 0)
-    data
+    :gen_tcp.recv(client, 0)
   end
 
-  defp write_line(line, client) do
-    :gen_tcp.send(client, line)
+  defp write_line(client, {:ok, text}) do
+    :gen_tcp.send(client, text)
+  end
+
+  defp write_line(client, {:error, :unknown_command}) do
+    # Known error. Write to client
+    :gen_tcp.send(client, "UNKNOWN COMMAND\r\n")
+  end
+
+  defp write_line(client, {:error, :not_found}) do
+    # Bucket not found
+    :gen_tcp.send(client, "NOT FOUND\r\n")
+  end
+
+  defp write_line(client, {:error, :closed}) do
+    # The connection was closed. Exit politely
+    exit(:shutdown)
+  end
+
+  defp write_line(client, {:error, error}) do
+    # Unknown error. Write to client and exit.
+    :gen_tcp.send(client, "ERROR\r\n")
+    exit(error)
   end
 end
