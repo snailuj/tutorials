@@ -92,7 +92,7 @@ defmodule KVServer do
     :gen_tcp.send(client, "NOT FOUND\r\n")
   end
 
-  defp write_line(client, {:error, :closed}) do
+  defp write_line(_client, {:error, :closed}) do
     # The connection was closed. Exit politely
     exit(:shutdown)
   end

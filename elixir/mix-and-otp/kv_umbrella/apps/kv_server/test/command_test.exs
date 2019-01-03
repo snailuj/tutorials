@@ -4,6 +4,8 @@ defmodule KVServer.CommandTest do
 
   setup context do
     _ = start_supervised!({KV.Registry, name: context.test})
+    # make all routes lead to the current node
+    Application.put_env(:kv, :routing_table, [{?a..?z, node()}])
     %{registry: context.test}
   end
 
@@ -46,6 +48,8 @@ defmodule KVServer.CommandIntegrationTest do
   setup do
     Application.stop(:kv)
     :ok = Application.start(:kv)
+    # make all routes lead to the current node
+    Application.put_env(:kv, :routing_table, [{?a..?z, node()}])
   end
 
   setup do
