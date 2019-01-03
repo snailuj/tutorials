@@ -18,9 +18,11 @@ defmodule KV.Bucket do
          KV.Supervisor (`use Supervisor`)
            |--- starts ----> DynamicSupervisor (named KV.BucketSupervisor)
            |--- starts ----> Registry (`use GenServer`)
-                               |--- starts ----> KV.Bucket (`use Agent`)
-                                                /    ||    \
-                                          Bucket   Bucket  ... Bucket
+           |                  |--- supervised by ---> KV.BucketSupervisor
+           |                                         /         |         \
+           |                                     Agent     Agent         Agent
+           |                                 KV.Bucket   KV.Bucket ...  KV.Bucket
+           |--- starts ----> Task.Supervisor (named KV.RouterTasks)
   """
 
   @doc """

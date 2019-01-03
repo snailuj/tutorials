@@ -65,7 +65,7 @@ defmodule KVServer.Command do
 
   def run({:delete, bucket, key}, registry) do
     lookup(bucket, registry, fn pid ->
-      KV.Bucket.delete(pid, bucket, key)
+      KV.Bucket.delete(pid, key)
       {:ok, "OK\r\n"}
     end)
   end

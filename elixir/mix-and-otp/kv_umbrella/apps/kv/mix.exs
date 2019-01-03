@@ -19,6 +19,12 @@ defmodule KV.MixProject do
   def application do
     [
       extra_applications: [:logger],
+      # env returns the application default environment
+      # the app would ship with an empty routing table, to be configured
+      # depending on the testing/deployment scenario
+      # a default routing table has been configured for the umbrella project
+      # in kv_umbrella/config/config.exs
+      env: [routing_table: []],
       # `:mod` specifies the "application callback module", plus args
       # to be passed on app start. Application module must implement
       # the `Application` behaviour

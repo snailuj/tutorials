@@ -31,3 +31,22 @@ config :logger, :handle_sasl_reports, true
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env()}.exs"
+
+
+# The mix run command also accepts a --config flag, which allows configuration files
+# to be given on demand. This could be used to start different nodes, each with its
+#  own specific configuration (for example, different routing tables).
+#
+# App-by-app configuration and the fact that we have built our software as an umbrella
+# application gives us plenty of options when deploying the software. We can:
+#
+#   > deploy the umbrella application to a node that will work as both TCP server and
+#     key-value storage
+#
+#   > deploy the :kv_server application to work only as a TCP server as long as the
+#     routing table points only to other nodes
+#
+#   > deploy only the :kv application when we want a node to work only as storage (no
+#     TCP access)
+
+config :kv, :routing_table, [{?a..?m, :foo@scorpio}, {?n..?z, :bar@scorpio}]

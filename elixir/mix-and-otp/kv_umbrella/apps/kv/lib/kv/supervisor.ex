@@ -35,7 +35,10 @@ defmodule KV.Supervisor do
       # the exact children you will need ahead of time. No need to create our
       # own module that will `use DynamicSupervisor` because there are no
       # children to explicitly create
-      {DynamicSupervisor, name: KV.BucketSupervisor, strategy: :one_for_one}
+      {DynamicSupervisor, name: KV.BucketSupervisor, strategy: :one_for_one},
+      # Distributed tasks are exactly the same as supervised tasks. The only
+      # difference is that we pass the node name when spawning the task on the supervisor.
+      {Task.Supervisor, name: KV.RouterTasks},
     ]
 
     # Since `KV.Registry` invokes `KV.BucketSupervisor`, then the `KV.BucketSupervisor`
