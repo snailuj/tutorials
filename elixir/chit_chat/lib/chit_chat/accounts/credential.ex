@@ -29,7 +29,7 @@ defmodule ChitChat.Accounts.Credential do
   end
 
   @spec registration_changeset(any(), any()) :: none()
-  def registration_changeset(struct, attrs = %{}) do
+  def registration_changeset(struct, attrs \\ %{}) do
     struct
     # first of all, run it through the function above to do all that and then additionally do this
     |> changeset(attrs)
@@ -37,7 +37,7 @@ defmodule ChitChat.Accounts.Credential do
     |> cast(attrs, [:password, :password_confirmation])
     # if one of these validations fails, it will still pass on the changeset, but its :valid field will == false
     # and it will have an errors array as well
-    |> validate_required(attrs, [:password, :password_confirmation])
+    |> validate_required([:password, :password_confirmation])
     |> validate_length(:password, min: 8)
     |> validate_confirmation(:password)
     |> hash_password()

@@ -5,6 +5,7 @@
     </div>
   <% end %>
 
+  <!-- everywhere you see the param `f`, it just means the form -->
   <%= label f, :name %>
   <%= text_input f, :name %>
   <%= error_tag f, :name %>
@@ -12,6 +13,25 @@
   <%= label f, :username %>
   <%= text_input f, :username %>
   <%= error_tag f, :username %>
+
+  <!-- Generators had no way of knowing we would link Credential to User
+    so we need to add those fields manually to the form -->
+  <div class="form-group">
+    <!-- :credential is the Credential struct embedded in the User as we set up in ChitChat.Accounts.User -->
+    <%= inputs_for f, :credential, fn cf -> %>
+      <%= label cf, :email %>
+      <%= text_input cf, :email %>
+      <%= error_tag cf, :email %>
+
+      <%= label cf, :password %>
+      <%= password_input cf, :password %>
+      <%= error_tag cf, :password %>
+
+      <%= label cf, :password_confirmation %>
+      <%= password_input cf, :password_confirmation %>
+      <%= error_tag cf, :password_confirmation %>
+    <% end %>
+  </div>
 
   <div>
     <%= submit "Save" %>
