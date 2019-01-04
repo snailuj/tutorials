@@ -6,22 +6,41 @@ defmodule ChitChat.AccountsTest do
   describe "users" do
     alias ChitChat.Accounts.User
 
-    @valid_attrs %{name: "some name", username: "some username"}
+    @valid_attrs %{
+      name: "some name",
+      username: "some username",
+      credential: %{
+        email: "email@example.com",
+        password: "asdfasdf",
+        password_confirmation: "asdfasdf"
+      }
+    }
+
     @update_attrs %{name: "some updated name", username: "some updated username"}
     @invalid_attrs %{name: nil, username: nil}
 
     def user_fixture(attrs \\ %{}) do
-      {:ok, user} =
+      {:ok, %{credential: credential} = user} =
         attrs
         |> Enum.into(@valid_attrs)
         |> Accounts.create_user()
 
-      user
+      %{user | credential: %{credential | password: nil, password_confirmation: nil}}
     end
 
     test "list_users/0 returns all users" do
-      user = user_fixture()
-      assert Accounts.list_users() == [user]
+      %{credential: credential} = user = user_fixture()
+
+      assert Accounts.list_users() == [
+               %{
+                 user
+                 | credential: %Ecto.Association.NotLoaded{
+                     __field__: :credential,
+                     __cardinality__: :one,
+                     __owner__: ChitChat.Accounts.User
+                   }
+               }
+             ]
     end
 
     test "get_user!/1 returns the user with given id" do
@@ -67,8 +86,8 @@ defmodule ChitChat.AccountsTest do
   describe "credentials" do
     alias ChitChat.Accounts.Credential
 
-    @valid_attrs %{email: "some email", password_hash: "some password_hash"}
-    @update_attrs %{email: "some updated email", password_hash: "some updated password_hash"}
+    @valid_attrs %{email: "email@example.com", password_hash: "some password_hash"}
+    @update_attrs %{email: "updated@example.com", password_hash: "some updated password_hash"}
     @invalid_attrs %{email: nil, password_hash: nil}
 
     def credential_fixture(attrs \\ %{}) do
@@ -92,7 +111,7 @@ defmodule ChitChat.AccountsTest do
 
     test "create_credential/1 with valid data creates a credential" do
       assert {:ok, %Credential{} = credential} = Accounts.create_credential(@valid_attrs)
-      assert credential.email == "some email"
+      assert credential.email == "email@example.com"
       assert credential.password_hash == "some password_hash"
     end
 
@@ -102,8 +121,11 @@ defmodule ChitChat.AccountsTest do
 
     test "update_credential/2 with valid data updates the credential" do
       credential = credential_fixture()
-      assert {:ok, %Credential{} = credential} = Accounts.update_credential(credential, @update_attrs)
-      assert credential.email == "some updated email"
+
+      assert {:ok, %Credential{} = credential} =
+               Accounts.update_credential(credential, @update_attrs)
+
+      assert credential.email == "updated@example.com"
       assert credential.password_hash == "some updated password_hash"
     end
 

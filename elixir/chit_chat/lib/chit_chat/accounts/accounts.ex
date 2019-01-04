@@ -71,7 +71,7 @@ defmodule ChitChat.Accounts do
     # The second param is a keyword list, here we are specifying the function to use when
     # generating the Changeset for making a new Credential
     |> Ecto.Changeset.cast_assoc(:credential, with: &Credential.registration_changeset/2)
-    # Repo.insert/1 will insert
+    # Repo.insert/1 will insert the User and the Credential
     |> Repo.insert()
   end
 
