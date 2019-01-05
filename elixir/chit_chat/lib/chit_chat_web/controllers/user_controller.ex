@@ -3,6 +3,10 @@ defmodule ChitChatWeb.UserController do
 
   alias ChitChat.Accounts
   alias ChitChat.Accounts.User
+  import ChitChat.Auth, only: [logged_in_user: 2]
+
+  # restrict every action except :new and :create for non-logged-in user
+  plug :logged_in_user when action not in [:new, :create]
 
   def index(conn, _params) do
     users = Accounts.list_users()
@@ -16,6 +20,7 @@ defmodule ChitChatWeb.UserController do
 
   def create(conn, %{"user" => user_params}) do
     IO.inspect(user_params)
+
     case Accounts.create_user(user_params) do
       {:ok, user} ->
         conn
