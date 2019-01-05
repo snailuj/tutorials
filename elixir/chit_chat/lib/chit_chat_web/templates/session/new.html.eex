@@ -1,0 +1,20 @@
+<div style="max-width: 300px">
+    <h1>Sign in</h1>
+
+    <!-- when someone hits the form, it will hit the :new action, but when they fill
+     out the form and submit it, it needs to hit the :create action -->
+    <%= form_for @conn, Routes.session_path(@conn, :create), [method: :post, as: :user], fn f -> %>
+        <div>
+            <!-- `f` is the form passed in to the anonymous function we are inside of 
+                by virtue of passing it to `form_for` -->
+            <%= text_input f, :email, placeholder: "Email", class: "form-control" %>
+        </div>
+        <div>
+            <%= password_input f, :password, placeholder: "Password", class: "form-control" %>
+        </div>
+
+        <div>
+            <%= submit "Login" %>
+        </div>
+    <% end %>
+</div>

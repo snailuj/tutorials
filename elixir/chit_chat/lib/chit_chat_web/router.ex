@@ -18,8 +18,16 @@ defmodule ChitChatWeb.Router do
 
     get "/", PageController, :index
 
+    # setup /session/login and /session/logout as routes
+    # instead of /session/new and /session/delete
+    get "/login", SessionController, :new
+    get "/logout", SessionController, :delete
+
     resources "/rooms", RoomController
     resources "/users", UserController
+    # normally resources will use all typical actions and will have e.g. /users/:id but we
+    # don't want either of those for sessions
+    resources "/sessions", SessionController, only: [:new, :create, :delete], singleton: true
   end
 
   # Other scopes may use custom stacks.

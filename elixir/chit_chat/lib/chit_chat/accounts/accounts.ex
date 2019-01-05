@@ -94,13 +94,14 @@ defmodule ChitChat.Accounts do
   """
   def update_user(%User{} = user, attrs) do
     # Figure out which changeset we want to use
+    # if there's a credential inside the attrs and it has a password and it's empty string
     cred_changeset =
-        #if there's a credential inside the attrs and it has a password and it's empty string
-        if attrs["credential"]["password"] == "" do
-            &Credential.changeset/2
-        else
-            &Credential.registration_changeset/2
-        end
+      if attrs["credential"]["password"] == "" do
+        &Credential.changeset/2
+      else
+        &Credential.registration_changeset/2
+      end
+
     user
     |> User.changeset(attrs)
     # If there's no credential at all in the attrs, then Ecto won't do anything to it when we
@@ -141,97 +142,122 @@ defmodule ChitChat.Accounts do
 
   alias ChitChat.Accounts.Credential
 
-  @doc """
-  Returns the list of credentials.
+  def authenticate_by_email_password(email, given_pass) do
+    cred =
+      Repo.get_by(Credential, email: email)
+      |> Repo.preload(:user)
 
-  ## Examples
+    cond do
+      cred && checkpw(given_pass, cred.password_hash) ->
+        {:ok, cred.user}
 
-      iex> list_credentials()
-      [%Credential{}, ...]
+      # password didn't match the email
+      cred ->
+        {:error, :unauthorized}
 
-  """
-  def list_credentials do
-    Repo.all(Credential)
+      # email doesn't exist in db
+      true ->
+        dummy_checkpw()
+        {:error, :not_found}
+    end
   end
 
-  @doc """
-  Gets a single credential.
+  #
+  ## Credentials are never accessed or updated outside of a User,
+  # so commenting these functions out
+  #
 
-  Raises `Ecto.NoResultsError` if the Credential does not exist.
+  #   @doc """
+  #   Returns the list of credentials.
 
-  ## Examples
+  #   ## Examples
 
-      iex> get_credential!(123)
-      %Credential{}
+  #       iex> list_credentials()
+  #       [%Credential{}, ...]
 
-      iex> get_credential!(456)
-      ** (Ecto.NoResultsError)
+  #   """
+  #   def list_credentials do
+  #     Repo.all(Credential)
+  #   end
 
-  """
-  def get_credential!(id), do: Repo.get!(Credential, id)
+  #   @doc """
+  #   Gets a single credential.
 
-  @doc """
-  Creates a credential.
+  #   Raises `Ecto.NoResultsError` if the Credential does not exist.
 
-  ## Examples
+  #   ## Examples
 
-      iex> create_credential(%{field: value})
-      {:ok, %Credential{}}
+  #       iex> get_credential!(123)
+  #       %Credential{}
 
-      iex> create_credential(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  #       iex> get_credential!(456)
+  #       ** (Ecto.NoResultsError)
 
-  """
-  def create_credential(attrs \\ %{}) do
-    %Credential{}
-    |> Credential.changeset(attrs)
-    |> Repo.insert()
-  end
+  #   """
+  #   def get_credential!(id), do: Repo.get!(Credential, id)
 
-  @doc """
-  Updates a credential.
+  #   @doc """
+  #   Creates a credential.
 
-  ## Examples
+  #   ## Examples
 
-      iex> update_credential(credential, %{field: new_value})
-      {:ok, %Credential{}}
+  #       iex> create_credential(%{field: value})
+  #       {:ok, %Credential{}}
 
-      iex> update_credential(credential, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
+  #       iex> create_credential(%{field: bad_value})
+  #       {:error, %Ecto.Changeset{}}
 
-  """
-  def update_credential(%Credential{} = credential, attrs) do
-    credential
-    |> Credential.changeset(attrs)
-    |> Repo.update()
-  end
+  #   """
+  #   def create_credential(attrs \\ %{}) do
+  #     %Credential{}
+  #     |> Credential.changeset(attrs)
+  #     |> Repo.insert()
+  #   end
 
-  @doc """
-  Deletes a Credential.
+  #   @doc """
+  #   Updates a credential.
 
-  ## Examples
+  #   ## Examples
 
-      iex> delete_credential(credential)
-      {:ok, %Credential{}}
+  #       iex> update_credential(credential, %{field: new_value})
+  #       {:ok, %Credential{}}
 
-      iex> delete_credential(credential)
-      {:error, %Ecto.Changeset{}}
+  #       iex> update_credential(credential, %{field: bad_value})
+  #       {:error, %Ecto.Changeset{}}
 
-  """
-  def delete_credential(%Credential{} = credential) do
-    Repo.delete(credential)
-  end
+  #   """
+  #   def update_credential(%Credential{} = credential, attrs) do
+  #     credential
+  #     |> Credential.changeset(attrs)
+  #     |> Repo.update()
+  #   end
 
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking credential changes.
+  #   @doc """
+  #   Deletes a Credential.
 
-  ## Examples
+  #   ## Examples
 
-      iex> change_credential(credential)
-      %Ecto.Changeset{source: %Credential{}}
+  #       iex> delete_credential(credential)
+  #       {:ok, %Credential{}}
 
-  """
-  def change_credential(%Credential{} = credential) do
-    Credential.changeset(credential, %{})
-  end
+  #       iex> delete_credential(credential)
+  #       {:error, %Ecto.Changeset{}}
+
+  #   """
+  #   def delete_credential(%Credential{} = credential) do
+  #     Repo.delete(credential)
+  #   end
+
+  #   @doc """
+  #   Returns an `%Ecto.Changeset{}` for tracking credential changes.
+
+  #   ## Examples
+
+  #       iex> change_credential(credential)
+  #       %Ecto.Changeset{source: %Credential{}}
+
+  #   """
+  #   def change_credential(%Credential{} = credential) do
+  #     Credential.changeset(credential, %{})
+  #   end
 end
