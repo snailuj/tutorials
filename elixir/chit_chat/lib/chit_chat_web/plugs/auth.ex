@@ -7,6 +7,7 @@ defmodule ChitChat.Auth do
   # Need to import Controller for `put_flash/3` and `redirect`
   import Phoenix.Controller
   alias ChitChatWeb.Router.Helpers
+  alias ChitChatWeb.ErrorView
 
   # To be a valid Plug, we need two things:
   #   a `call` function, that gets run every time the Plug is used
@@ -27,8 +28,7 @@ defmodule ChitChat.Auth do
     user_id = get_session(conn, :user_id)
     user = user_id && ChitChat.Accounts.get_user!(user_id)
 
-    # Put the current User into the assigns
-    assign(conn, :current_user, user)
+    put_current_user(conn, user)
 
     # Now we have the current user, or `false` if not logged in, anywhere in the app
   end
@@ -45,5 +45,33 @@ defmodule ChitChat.Auth do
     |> redirect(to: Helpers.page_path(conn, :index))
     # if you don't halt after a redirect then the Conn will get rendered twice and that causes probs
     |> halt()
+  end
+
+  def admin_user(conn = %{asigns: %{admin_user: true}}, _), do: conn
+
+  def admin_user(conn, opts) do
+    if opts[:pokerface] do
+      conn
+      |> put_status(404)
+      |> render(ErrorView, :"404", message: "Page not found")
+      |> halt()
+    end
+
+    conn
+    |> put_flash(:error, "You do not have access to that page")
+    |> redirect(to: Helpers.page_path(conn, :index))
+    # if you don't halt after a redirect then the Conn will get rendered twice and that causes probs
+    |> halt()
+  end
+
+  def put_current_user(conn, user) do
+    conn
+    # Put the current User into the assigns
+    |> assign(:current_user, user)
+    |> assign(
+      :admin_user,
+      # obviously in a real app you'd want to use roles for this!
+      !!user && !!user.credential && !!(user.credential.email == "julian.suggate@gmail.com")
+    )
   end
 end
