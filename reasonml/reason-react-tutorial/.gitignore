@@ -1,0 +1,12 @@
+# dependencies
+node_modules/
+
+# IDE
+.vscode/
+.merlin
+
+# build
+src/**/*.bs.js
+lib/
+.cache/
+dist/
