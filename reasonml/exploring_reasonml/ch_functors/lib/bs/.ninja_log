@@ -1,0 +1,12 @@
+# ninja log v5
+1	8	1554153590	ExploringReasonmlChfunctors.cmi	a8f0c82af895c0f2
+0	12	1554154916	src/ch_functors.mlast	499eede6f2d47232
+0	8	1554154916	src/ch_functors-ExploringReasonmlChfunctors.cmj	f140bb63071c275a
+0	8	1554154916	/home/julian/coding/tutorials/reasonml/exploring_reasonml/ch_functors/src/ch_functors.bs.js	f140bb63071c275a
+12	14	1554154916	src/ch_functors.mlast.d	630eecb348e55f96
+0	8	1554154916	src/ch_functors-ExploringReasonmlChfunctors.cmi	f140bb63071c275a
+1	12	1554162724	src/ch_functors.mlast	499eede6f2d47232
+12	13	1554162724	src/ch_functors.mlast.d	630eecb348e55f96
+0	8	1554162724	src/ch_functors-ExploringReasonmlChfunctors.cmj	f140bb63071c275a
+0	8	1554162724	/home/julian/coding/tutorials/reasonml/exploring_reasonml/ch_functors/src/ch_functors.bs.js	f140bb63071c275a
+0	8	1554162724	src/ch_functors-ExploringReasonmlChfunctors.cmi	f140bb63071c275a
