@@ -12,7 +12,7 @@ defmodule Phat.Application do
       Phat.Repo,
       # Start the endpoint when the application starts
       PhatWeb.Endpoint,
-      PhatWeb.Presence
+      PhatWeb.Presence # JSJSJS need to add this line as well
       # Starts a worker by calling: Phat.Worker.start_link(arg)
       # {Phat.Worker, arg},
     ]
