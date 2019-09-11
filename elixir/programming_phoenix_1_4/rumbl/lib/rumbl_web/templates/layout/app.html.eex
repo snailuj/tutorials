@@ -12,7 +12,18 @@
       <section class="container">
         <nav role="navigation">
           <ul>
-            <li><%= link "Users", to: Routes.user_path(@conn, :index) %></li>
+            <%= if !@current_user do %>
+              <li><%= link "Register", to: Routes.user_path(@conn, :create) %></li>
+              <li><%= link "Log in", to: Routes.session_path(@conn, :new) %>    
+            <%= else %>
+              <li><%= @current_user.username %></li>
+              <li>
+                <%= link "Log out", 
+                      to: Routes.session_path(@conn, :delete, @current_user), 
+                      method: "delete" %>
+              </li>
+              <li><%= link "Users", to: Routes.user_path(@conn, :index) %></li>
+            <% end %>
           </ul>
         </nav>
       </section>
